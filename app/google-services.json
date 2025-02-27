@@ -1,0 +1,30 @@
+{
+  "project_info": {
+    "project_number": "820492168593",
+    "firebase_url": "https://zonealert-f2e78-default-rtdb.firebaseio.com",
+    "project_id": "zonealert-f2e78",
+    "storage_bucket": "zonealert-f2e78.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:820492168593:android:a34937f6f2e52c9c9dfe30",
+        "android_client_info": {
+          "package_name": "com.example.zonealert"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCInR_bTHJRHobyDQMIcRMFPxy31lgCezo"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
