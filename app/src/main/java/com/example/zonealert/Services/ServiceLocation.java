@@ -107,7 +107,6 @@ public class ServiceLocation extends Service {
             LocationRequest locationRequest = new LocationRequest.Builder(1000)
                     .setPriority(Priority.PRIORITY_HIGH_ACCURACY)
                     .setIntervalMillis(3000)
-                    //.setMinUpdateDistanceMeters(20.0f)
                     .setMinUpdateIntervalMillis(1000)
                     .setMaxUpdateDelayMillis(10000)
                     .build();
@@ -131,7 +130,7 @@ public class ServiceLocation extends Service {
 
             jsonLastMyLocation = new Gson().toJson(myLocation);
 
-            notificationBuilder.setContentText(System.currentTimeMillis()+"Current lat: "+ String.format("%2f",lastLocation.getLatitude())+
+            notificationBuilder.setContentText("Current lat: "+ String.format("%2f",lastLocation.getLatitude())+
                     "\nCurrent lon: "+String.format("%2f",lastLocation.getLongitude()));
             final NotificationManager notificationManager = (NotificationManager)getSystemService(Service.NOTIFICATION_SERVICE);
             notificationManager.notify(NOTIFICATION_ID,notificationBuilder.build());

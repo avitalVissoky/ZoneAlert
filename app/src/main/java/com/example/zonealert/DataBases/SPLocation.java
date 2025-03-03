@@ -6,6 +6,7 @@ import android.content.Context;
 import android.content.SharedPreferences;
 import android.location.Location;
 
+import com.example.zonealert.Entities.LocationData;
 import com.example.zonealert.Entities.MyLocation;
 import com.example.zonealert.Entities.Visit;
 import com.google.common.reflect.TypeToken;
@@ -20,8 +21,8 @@ public class SPLocation {
     private static final String PREFS_NAME = "LocationPrefs";
     private static final String KEY_LOCATIONS = "locations";
     private static final String KEY_LAST_LOCATION = "last_location";
-    private static final double MERGE_DISTANCE_THRESHOLD = 100; // מטרים
-    private static final String KEY_TOTAL_LOCATION_DURATION = "total_location_duration";
+    private static final double MERGE_DISTANCE_THRESHOLD = 100;
+    private static final String KEY_LOCATION_DATA = "location_data";
 
     private SharedPreferences sharedPreferences;
     private Gson gson;
@@ -31,20 +32,19 @@ public class SPLocation {
         this.gson = new Gson();
     }
 
-    private HashMap<String,Long> getDurations() {
-        String json = sharedPreferences.getString(KEY_TOTAL_LOCATION_DURATION, "");
-        Type type = new TypeToken<HashMap<String,Long>>() {}.getType();
-        return json.isEmpty() ? new HashMap<String,Long>() : gson.fromJson(json, type);
+    private HashMap<String, LocationData> getLocationDataMap() {
+        String json = sharedPreferences.getString(KEY_LOCATION_DATA, "");
+        Type type = new TypeToken<HashMap<String, LocationData>>() {}.getType();
+        return json.isEmpty() ? new HashMap<>() : gson.fromJson(json, type);
     }
 
-    private void saveTotalDuration(HashMap<String,Long> durations) {
-        sharedPreferences.edit().putString(KEY_TOTAL_LOCATION_DURATION, gson.toJson(durations)).apply();
+    private void saveLocationDataMap(HashMap<String, LocationData> locationDataMap) {
+        sharedPreferences.edit().putString(KEY_LOCATION_DATA, gson.toJson(locationDataMap)).apply();
     }
-
 
     public void updateLocation(MyLocation newLocation) {
         HashMap<String, MyLocation> locations = getSavedLocations();
-        HashMap<String,Long> durations = getDurations();
+        HashMap<String, LocationData> locationDataMap = getLocationDataMap();
         String newLocationKey ="";
 
         String lastLocationKey = sharedPreferences.getString(KEY_LAST_LOCATION, null);
@@ -57,18 +57,20 @@ public class SPLocation {
             if (lastLocation != null && isWithinRange(lastLocation, newLocation)) {
                 // update last location visit duration
                 List<Visit> visits = lastLocation.getVisits();
-                newLocationKey=lastLocationKey;
-                long prevTotalDuration = durations.containsKey(newLocationKey)? durations.get(newLocationKey): 0;
-                durations.put(newLocationKey,prevTotalDuration-visits.get(visits.size() - 1).getDuration());
                 if (!visits.isEmpty()) {
+                    long prevDuration = visits.get((visits.size()-1)).getDuration();
                     visits.get(visits.size() - 1).setDuration(currentTime);
+                    long newDuration = visits.get(visits.size()-1).getDuration();
+
+                    LocationData locData = locationDataMap.get(lastLocationKey);
+                    if(locData!=null){
+                        locData.updateLastVisitDuration(prevDuration,newDuration);
+                        locationDataMap.put(lastLocationKey,locData);
+                    }
                 }
                 saveLocations(locations);
+                newLocationKey=lastLocationKey;
                 updated = true;
-
-                long visitDuration = visits.get(visits.size()-1).getDuration(); // get the updated duration for the current visit
-                prevTotalDuration = durations.containsKey(newLocationKey)? durations.get(newLocationKey): 0;
-                durations.put(newLocationKey,prevTotalDuration+visitDuration);
             }
         }
 
@@ -78,11 +80,17 @@ public class SPLocation {
             for (Map.Entry<String, MyLocation> entry : locations.entrySet()) {
                 MyLocation loc = entry.getValue();
                 if (isWithinRange(loc, newLocation)) {
+                    //when the user returns to a location he has been at before.
                     //found existing location matching
                     loc.addVisit(new Visit(currentTime));
                     saveLocations(locations);
                     newLocationKey = entry.getKey();
                     sharedPreferences.edit().putString(KEY_LAST_LOCATION, newLocationKey).apply();
+                    LocationData locData = locationDataMap.get(newLocationKey);
+                    if(locData!=null){
+                        locData.addVisit(0);
+                        locationDataMap.put(newLocationKey,locData);
+                    }
                     foundExisting = true;
                     break;
                 }
@@ -94,14 +102,13 @@ public class SPLocation {
                 newLocationKey = generateLocationKey(newLocation);
                 locations.put(newLocationKey, newLocation);
                 saveLocations(locations);
-                durations.put(newLocationKey,(long)0);
+                LocationData newLocData = new LocationData(1,0,0);
+                locationDataMap.put(newLocationKey, newLocData);
                 sharedPreferences.edit().putString(KEY_LAST_LOCATION, newLocationKey).apply();
             }
         }
-        saveTotalDuration(durations);
+        saveLocationDataMap(locationDataMap);
     }
-
-
 
     public HashMap<String,MyLocation> getSavedLocations() {
         String json = sharedPreferences.getString(KEY_LOCATIONS, "");

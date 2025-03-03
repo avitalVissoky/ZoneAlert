@@ -8,7 +8,7 @@ public class Visit {
 
     public Visit(long startTime) {
         this.startTime = startTime;
-        this.duration = 0; // ביקור פעיל
+        this.duration = 0;
     }
 
     public long getStartTime() { return startTime; }
