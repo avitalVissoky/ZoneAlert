@@ -51,6 +51,6 @@ The app requires the following permissions for full functionality:
 - It automatically restarts the location tracking service.
 
 ## ScreenShots
-<img src="https://github.com/user-attachments/assets/2f195eb2-df5d-4cfe-b7bf-a8cbf3226bec" style="height:400px;"/>
+<img src="https://github.com/user-attachments/assets/a7c9e830-80fe-4283-98ba-b11ab7816644" style="height:400px;"/>
 <img src="https://github.com/user-attachments/assets/8a63b2f5-01cd-4b92-a4a8-689ba872037b" style="height:400px;"/>
 <img src="https://github.com/user-attachments/assets/2f195eb2-df5d-4cfe-b7bf-a8cbf3226bec" style="height:400px;"/>
